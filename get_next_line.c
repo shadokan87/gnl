@@ -3,41 +3,42 @@
 int	get_next_line(int fd, char **line)
 {
 	static char *stack[4094];
-	char buff[BUFFER_SIZE];
+	char buff[BUFFER_SIZE + 1];
 	int file;
 	char *tmp;
+	int len;
 
-	tmp = NULL;
 	if (fd < 0 || line == NULL)
 		return (-1);
 	while (1)
 	{
-		if (c_len(stack[fd], ENDL) > -1)
-			break ;
-		file = read(fd, buff, BUFFER_SIZE);
-		if (file == 0)
-			break ;
-		buff[file] = '\0';
-		if (file > 0)
-		{
-			stack[fd] = ft_realloc(stack[fd], file + (!stack[fd] ? 0 :
-					c_len(stack[fd], '\0')) + 1 * sizeof(char));
-			ft_memcpy_index((void**)&stack[fd], buff, c_len(stack[fd], '\0'));
-		}
+	if (stack[fd] && c_len(stack[fd], '\n') > -1)
+		break ;
+	len = 0;
+	len = (stack[fd]) ? c_len(stack[fd], '\0') : len;
+	file = read(fd, buff, BUFFER_SIZE);
+	if (file == 0)
+		break ;
+	buff[file] = '\0';
+	//if (!stack[fd])
+		//stack[fd] = malloc(sizeof(char) * file + 1);
+	if (!(stack[fd] = ft_realloc(stack[fd], sizeof(char) * len + file + 1)))
+		return (0);
+	ft_memcpy_index((void **)&stack[fd], buff, len, -1);
 	}
-	tmp = ft_realloc(tmp, c_len(stack[fd], '\0')) + 1 * sizeof(char);
-	ft_memcpy_index((void**)&tmp, stack[fd], 0);
-	*line = tmp;
-	printf("GNL : %s", *line);
-	return (1);
+	return (return_value(line, &stack[fd], file));
 }
 
 int	main(int argc, char **argv)
 {
 	int fd = open(argv[1], O_RDONLY);
 	char *line;
+	int ret;
 	
 	(void)argc;
-	get_next_line(fd, &line);
-	printf("\nmain : %s", line);
+	while ((ret = get_next_line(fd, &line)) > 0)
+	{
+	printf("%s |%d|", line, ret);
+	free(line);
+	}
 }

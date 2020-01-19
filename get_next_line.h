@@ -12,6 +12,7 @@
 # include "Memd/mem.h"
 
 void	*ft_realloc(void *ptr, size_t size);
-void	ft_memcpy_index(void **dst, void *src, size_t index);
+void	ft_memcpy_index(void **dst, void *src, size_t index, int max);
 int		c_len(char *str, char c);
+int		return_value(char **line, char **stack, int file);
 #endif

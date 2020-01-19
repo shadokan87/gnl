@@ -22,23 +22,28 @@ int		c_len(char *str, char c)
 	return (-1);
 }
 
-void	ft_memcpy_index(void **dst, void *src, size_t index)
-{
-	unsigned long src_index;
-	unsigned char *c_dst;
-	unsigned char *c_src;
 
-	if (!src || !dst)
-		return ;
-	src_index = 0;
-	c_dst = (unsigned char *)*dst;
-	c_src = (unsigned char *)src;
-	while (*c_src)
+void	ft_memcpy_index(void **dst, void *src, size_t index, int max)
+{
+	unsigned char *c_dst = (unsigned char *)*dst;
+	unsigned char *c_src = (unsigned char *)src;
+	if (max == -1)
+	{
+		while (*c_src)
 	{
 		c_dst[index] = *c_src;
-		c_src++ && index++;
+		*c_src ++ && index++;
 	}
 	c_dst[index] = *c_src;
+	return ;
+	}
+	while (max)
+	{
+		c_dst[index] = *c_src;
+		*c_src ++ && index++;
+		max--;
+	}
+	c_dst[index] = 0;
 }
 
 //should realloc a pointer to the new size (size) like the original function
@@ -50,21 +55,43 @@ void	ft_memcpy_index(void **dst, void *src, size_t index)
 
 void	*ft_realloc(void *ptr, size_t size)
 {
-	void *return_value;
-	unsigned long i;
-	unsigned char *c_ptr;
+	void	*return_value;
 
-	i = 0;
 	if (!ptr)
 		return (malloc(size));
-	c_ptr = (unsigned char *)ptr;
-	while (c_ptr[i])
-		i++;
-	if (size <= i)
+	else if (size <= c_len((char *)ptr, '\0'))
 		return (ptr);
-	if (!(return_value = malloc(size)))
-		return (0);
-	ft_memcpy_index(&return_value, ptr, 0);
-	free(ptr);
+	else
+	{
+		if (!(return_value = malloc(size)))
+			return (0);
+		ft_memcpy_index((void **)&return_value, ptr, 0, -1);
+		free(ptr);
+	}
 	return (return_value);
+}
+
+int		return_value(char **line, char **stack, int file)
+{
+	char *tmp;
+
+	if (c_len(*stack, ENDL) > -1)
+	{
+	*line = malloc(sizeof(char) * c_len(*stack, ENDL) + 1);
+	ft_memcpy_index((void **)line, *stack, 0, c_len(*stack, ENDL));
+	tmp = malloc(sizeof(char) * c_len(*stack, '\0') - c_len(*line, '\0'));
+	ft_memcpy_index((void **)&tmp, &(*stack)[c_len(*stack, ENDL) + 1],0, -1);
+	free(*stack);
+	*stack = tmp;
+	return (1);
+	}
+	if (*stack)
+	{
+		*line = malloc(sizeof(char) * c_len(*stack, '\0') + 1);
+		ft_memcpy_index((void **)line, *stack, 0, -1);
+		free(*stack);
+		*stack = NULL;
+		return (1);
+	}
+	return (0);
 }
